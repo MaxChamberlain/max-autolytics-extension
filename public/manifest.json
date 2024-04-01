@@ -4,22 +4,41 @@
   "version": "1.0",
   "description": "",
   "action": {
-      "default_popup": "index.html",
-      "default_title": "Max Autolytics",
-      "default_icon": "logo.png"
+    "default_popup": "index.html",
+    "default_title": "Max Autolytics",
+    "default_icon": "logo.png"
   },
   "permissions": [
-      "scripting",
-      "tabs",
-      "activeTab",
-      "storage"
+    "scripting",
+    "tabs",
+    "activeTab",
+    "storage",
+    "runtime",
+    "browserAction"
   ],
   "host_permissions": [
-      "https://*/*",
-      "http://*/*"
+    "https://profittime.vauto.app.coxautoinc.com/*",
+    "http://*/*"
   ],
   "icons": {
     "16": "logo.png",
     "32": "logo.png"
-  }
+  },
+  "background": {
+    "service_worker": "worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://provision.vauto.app.coxautoinc.com/*"],
+      "js": ["create-sale-grabbers.js", "remove-sale-grabbers.js"]
+    },
+    {
+      "matches": [
+        "https://v3.maxautolytics.com/*",
+        "https://beta.maxautolytics.com/*",
+        "https://maxautolytics.com/*"
+      ],
+      "js": ["put-sale-vehicle.js"]
+    }
+  ]
 }
