@@ -46,6 +46,24 @@
       chrome.runtime.sendMessage({
         action: 'remove-sale-grabbers'
       })
+
+      const statusDisplay = document.createElement('div')
+      statusDisplay.id = 'autolytics-status-display'
+      statusDisplay.style.position = 'absolute'
+      statusDisplay.style.top = '0'
+      statusDisplay.style.left = '0'
+      statusDisplay.style.height = '100%'
+      statusDisplay.style.width = '100%'
+      statusDisplay.style.backgroundColor = 'white'
+      statusDisplay.style.zIndex = '1000'
+      statusDisplay.style.display = 'flex'
+      statusDisplay.style.justifyContent = 'center'
+      statusDisplay.style.alignItems = 'center'
+      statusDisplay.style.fontSize = '16px'
+      statusDisplay.innerText = 'Getting this sale...'
+      statusDisplay.border = '1px solid black'
+      row.appendChild(statusDisplay)
+
       const data = e.target.parentElement
       let children = data.children[0].children[0].children
       children = Array.from(children).map((e) =>
@@ -95,6 +113,10 @@
       )
         .then((e) => e.text())
         .then((e) => {
+          const statusDisplay = document.getElementById(
+            'autolytics-status-display'
+          )
+          statusDisplay.innerText = 'Processing data...'
           let obj = e.replace(/\\n/g, ' ')
           obj = obj.replace(/new Date\((\d+)\)/g, '$1')
           obj = obj.replace(/\\\\\",\\\"/g, '","')
@@ -292,13 +314,32 @@
           if (!details.StartPrice) {
             details.StartPrice = e['ListPrice']
           }
+          const statusDisplay = document.getElementById(
+            'autolytics-status-display'
+          )
+          statusDisplay.innerText =
+            'Got ' + details.VehicleFullName + ' : ' + details.StockNumber
+          statusDisplay.style.backgroundColor = 'lightgreen'
+          setTimeout(() => {
+            statusDisplay.remove()
+          }, 8000)
           chrome.runtime.sendMessage({
             action: 'update-sale-vehicle',
             data: details
           })
           return details
         })
-        .catch(console.log)
+        .catch((e) => {
+          console.log(e)
+          const statusDisplay = document.getElementById(
+            'autolytics-status-display'
+          )
+          statusDisplay.innerText = 'Error getting sale'
+          statusDisplay.style.backgroundColor = 'red'
+          setTimeout(() => {
+            statusDisplay.remove()
+          }, 15000)
+        })
     })
 
     row.appendChild(nodeClone)

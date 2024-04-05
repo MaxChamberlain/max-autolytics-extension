@@ -228,21 +228,39 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
     const origin = url.origin
 
     if (origin.includes('maxautolytics.com') || origin.includes('localhost')) {
-      // inject a script
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: function () {
-          if (document.getElementById('invisible-data-input')) {
-            const script = document.getElementById('invisible-data-input')
-            chrome.storage.local.get('saleVehicle', (data) => {
+          chrome.storage.local.get('saleVehicle', (data) => {
+            if (!data.saleVehicle) return
+            if (document.getElementById('invisible-data-input')) {
+              const script = document.getElementById('invisible-data-input')
               if (data) {
                 script.setAttribute('data', JSON.stringify(data.saleVehicle))
-                script.style.display = 'block'
+                script.click()
+                chrome.storage.local.remove('saleVehicle')
               } else {
                 console.log('No data')
               }
-            })
-          }
+            } else if (document.getElementById('add-sale-btn')) {
+              document.getElementById('add-sale-btn').click()
+              setTimeout(() => {
+                if (document.getElementById('invisible-data-input')) {
+                  const script = document.getElementById('invisible-data-input')
+                  if (data) {
+                    script.setAttribute(
+                      'data',
+                      JSON.stringify(data.saleVehicle)
+                    )
+                    script.click()
+                    chrome.storage.local.remove('saleVehicle')
+                  } else {
+                    console.log('No data')
+                  }
+                }
+              }, 500)
+            }
+          })
         }
       })
     }

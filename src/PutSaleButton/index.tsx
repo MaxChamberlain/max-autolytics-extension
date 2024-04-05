@@ -23,6 +23,7 @@ export default function PutSaleButton() {
         disabled={!saleVehicle}
         onClick={() => {
           chrome.runtime.sendMessage({ action: 'put-sale-vehicle' })
+          window.close()
         }}
       >
         Put Sale

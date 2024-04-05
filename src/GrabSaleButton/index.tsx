@@ -40,6 +40,7 @@ export default function GrabSaleButton() {
           }
           chrome.runtime.sendMessage({ action: 'create-sale-grabbers' }, () => {
             setIsGrabbing(true)
+            window.close()
           })
         }}
       >

@@ -8,14 +8,7 @@
     "default_title": "Max Autolytics",
     "default_icon": "logo.png"
   },
-  "permissions": [
-    "scripting",
-    "tabs",
-    "activeTab",
-    "storage",
-    "runtime",
-    "browserAction"
-  ],
+  "permissions": ["scripting", "tabs", "activeTab", "storage", "browserAction"],
   "host_permissions": [
     "https://profittime.vauto.app.coxautoinc.com/*",
     "http://*/*"
