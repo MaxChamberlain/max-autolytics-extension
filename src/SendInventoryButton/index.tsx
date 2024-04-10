@@ -39,7 +39,18 @@ export default function SendInventoryButton() {
         fullWidth
         size='sm'
         color='static'
-        onClick={() => sendInventory(setIsSending, setProgressInfo)}
+        onClick={() => {
+          chrome.runtime.sendMessage(
+            {
+              action: 'get-vauto-store'
+            },
+            (response): void => {
+              let mpNumber = response?.split(' - ')[1]?.trim()
+              if (!mpNumber) return
+              sendInventory(setIsSending, setProgressInfo, mpNumber)
+            }
+          )
+        }}
       >
         Send Inventory to Max Autolytics
       </Button>
@@ -84,7 +95,11 @@ export default function SendInventoryButton() {
   )
 }
 
-async function sendInventory(setIsLoading: any, setProgressInfo: any) {
+async function sendInventory(
+  setIsLoading: any,
+  setProgressInfo: any,
+  dealerId: string
+) {
   try {
     setIsLoading(true)
     setProgressInfo({
@@ -97,13 +112,17 @@ async function sendInventory(setIsLoading: any, setProgressInfo: any) {
       action: 'get-vauto-inventory'
     })
 
-    fetch('http://localhost:9000/api/v2/webhook/inventory', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(inventory.data)
-    })
+    fetch(
+      'http://localhost:3000/api/v3/webhook/inventory/transfer/provision?DealerLogicalId=' +
+        dealerId,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(inventory.data)
+      }
+    )
       .then(async (e) => {
         const data = await e.text()
         setProgressInfo({
@@ -143,7 +162,7 @@ async function poll(setIsSending: any, setProgressInfo: any, taskId: string) {
   try {
     setIsSending(true)
     intervalId = setInterval(() => {
-      fetch('http://localhost:9000/api/v2/webhook/inventory?taskId=' + taskId)
+      fetch('http://localhost:3000/api/v3/webhook/process?taskId=' + taskId)
         .then(async (x) => {
           if (!x.ok) {
             console.error('here err')

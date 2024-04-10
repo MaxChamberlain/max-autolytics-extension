@@ -275,7 +275,7 @@
             if (e.InventoryTags.includes('source-')) {
               source = e.InventoryTags.split(',')[0]
                 .split('source-')[1]
-                .replace('-', ' ')
+                ?.replace('-', ' ')
                 .toUpperCase()
             }
           }
@@ -320,6 +320,10 @@
           statusDisplay.innerText =
             'Got ' + details.VehicleFullName + ' : ' + details.StockNumber
           statusDisplay.style.backgroundColor = 'lightgreen'
+          statusDisplay.style.cursor = 'pointer'
+          statusDisplay.addEventListener('click', () => {
+            statusDisplay.remove()
+          })
           setTimeout(() => {
             statusDisplay.remove()
           }, 8000)
@@ -336,6 +340,10 @@
           )
           statusDisplay.innerText = 'Error getting sale'
           statusDisplay.style.backgroundColor = 'red'
+          statusDisplay.style.cursor = 'pointer'
+          statusDisplay.addEventListener('click', () => {
+            statusDisplay.remove()
+          })
           setTimeout(() => {
             statusDisplay.remove()
           }, 15000)
