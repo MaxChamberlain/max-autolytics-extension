@@ -23,7 +23,11 @@
   "content_scripts": [
     {
       "matches": ["https://provision.vauto.app.coxautoinc.com/*"],
-      "js": ["create-sale-grabbers.js", "remove-sale-grabbers.js"]
+      "js": [
+        "create-sale-grabbers.js",
+        "remove-sale-grabbers.js",
+        "filter-no-source.js"
+      ]
     },
     {
       "matches": [

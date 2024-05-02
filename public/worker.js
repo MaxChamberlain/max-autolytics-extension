@@ -220,6 +220,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       }
     })
   }
+
+  if (request.action === 'filter-no-source') {
+    chrome.tabs.query(
+      { active: true, currentWindow: true },
+      async function (tabs) {
+        const tab = tabs[0]
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['filter-no-source.js']
+        })
+      }
+    )
+  }
 })
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {

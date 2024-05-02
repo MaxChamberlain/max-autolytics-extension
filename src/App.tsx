@@ -6,6 +6,7 @@ import OriginContextProvider from './contexts/OriginContext'
 import SendInventoryButton from './SendInventoryButton'
 import GrabSaleButton from './GrabSaleButton'
 import PutSaleButton from './PutSaleButton'
+import FilterNoSourceButton from './FilterNoSourceButton'
 
 function App() {
   const isAuthed = Boolean(localStorage.getItem('Authorization'))
@@ -34,6 +35,7 @@ function App() {
                 <GrabSaleButton />
                 <PutSaleButton />
                 <SendInventoryButton />
+                <FilterNoSourceButton />
               </FlexContainer>
             )}
           </OriginContextProvider>
