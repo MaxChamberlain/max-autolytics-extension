@@ -4,7 +4,8 @@ const allowedOrigins = [
   'https://beta.maxautolytics.com',
   'https://maxautolytics.com',
   'https://v3.maxautolytics.com',
-  'localhost'
+  'localhost',
+  'https://beta.maxautolytics.com'
 ]
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -239,6 +240,7 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
   chrome.tabs.get(activeInfo.tabId, function (tab) {
     const url = new URL(tab.url)
     const origin = url.origin
+    console.log('Origin:', origin)
 
     if (origin.includes('maxautolytics.com') || origin.includes('localhost')) {
       chrome.scripting.executeScript({

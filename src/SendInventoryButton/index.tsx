@@ -1,86 +1,86 @@
-import { useEffect, useState } from 'react'
-import FlexContainer from '../components/Layout/FlexContainer'
-import { Button } from '../components/Form'
-import { CircularProgress, LinearProgress } from '@mui/material'
+import { useEffect, useState } from "react";
+import FlexContainer from "../components/Layout/FlexContainer";
+import { Button } from "../components/Form";
+import { CircularProgress, LinearProgress } from "@mui/material";
 
 type ProgressInfo =
   | {
-      type: 'text'
+      type: "text";
       data: {
-        text: string
-      }
+        text: string;
+      };
     }
   | {
-      type: 'progress'
+      type: "progress";
       data: {
-        current: number
-        total: number
-      }
+        current: number;
+        total: number;
+      };
     }
-  | null
+  | null;
 
 export default function SendInventoryButton() {
-  const [isSending, setIsSending] = useState(false)
-  const [progressInfo, setProgressInfo] = useState<ProgressInfo>(null)
+  const [isSending, setIsSending] = useState(false);
+  const [progressInfo, setProgressInfo] = useState<ProgressInfo>(null);
 
   useEffect(() => {
-    chrome.storage.local.get('inventoryTaskId', (data) => {
+    chrome.storage.local.get("inventoryTaskId", (data) => {
       if (data.inventoryTaskId) {
-        console.log('data', data)
-        poll(setIsSending, setProgressInfo, data.inventoryTaskId)
+        console.log("data", data);
+        poll(setIsSending, setProgressInfo, data.inventoryTaskId);
       }
-    })
-  }, [])
+    });
+  }, []);
 
   return (
-    <FlexContainer direction='column' className='w-full' gap='2'>
+    <FlexContainer direction="column" className="w-full" gap="2">
       <Button
         disabled={isSending}
         fullWidth
-        size='sm'
-        color='static'
+        size="sm"
+        color="static"
         onClick={() => {
           chrome.runtime.sendMessage(
             {
-              action: 'get-vauto-store'
+              action: "get-vauto-store",
             },
             (response): void => {
-              let mpNumber = response?.split(' - ')[1]?.trim()
-              if (!mpNumber) return
-              sendInventory(setIsSending, setProgressInfo, mpNumber)
+              let mpNumber = response?.split(" - ")[1]?.trim();
+              if (!mpNumber) return;
+              sendInventory(setIsSending, setProgressInfo, mpNumber);
             }
-          )
+          );
         }}
       >
         Send Inventory to Max Autolytics
       </Button>
-      {isSending && progressInfo && progressInfo.type === 'text' && (
+      {isSending && progressInfo && progressInfo.type === "text" && (
         <FlexContainer
-          className='w-full'
-          gap='2'
-          align='center'
-          justify='center'
+          className="w-full"
+          gap="2"
+          align="center"
+          justify="center"
         >
           <CircularProgress size={20} />
           <p>{progressInfo.data.text}</p>
         </FlexContainer>
       )}
-      {isSending && progressInfo && progressInfo.type === 'progress' && (
+      {isSending && progressInfo && progressInfo.type === "progress" && (
         <FlexContainer
-          className='w-full'
-          gap='2'
-          align='center'
-          justify='center'
-          direction='column'
+          className="w-full"
+          gap="2"
+          align="center"
+          justify="center"
+          direction="column"
         >
           <LinearProgress
             value={100 * (progressInfo.data.current / progressInfo.data.total)}
             style={{
               height: 4,
-              width: '100%',
-              borderRadius: 4
+              width: "100%",
+              borderRadius: 4,
             }}
-            variant='determinate'
+            variant="determinate"
           />
           <p>
             {progressInfo.data.current} of {progressInfo.data.total} (
@@ -92,7 +92,7 @@ export default function SendInventoryButton() {
         </FlexContainer>
       )}
     </FlexContainer>
-  )
+  );
 }
 
 async function sendInventory(
@@ -101,126 +101,127 @@ async function sendInventory(
   dealerId: string
 ) {
   try {
-    setIsLoading(true)
+    setIsLoading(true);
     setProgressInfo({
-      type: 'text',
+      type: "text",
       data: {
-        text: 'Gathering inventory...'
-      }
-    })
+        text: "Gathering inventory...",
+      },
+    });
     const inventory = await chrome.runtime.sendMessage({
-      action: 'get-vauto-inventory'
-    })
+      action: "get-vauto-inventory",
+    });
 
     fetch(
-      'http://localhost:3000/api/v3/webhook/inventory/transfer/provision?DealerLogicalId=' +
+      import.meta.env.VITE_API_URL +
+        "/webhook/inventory/transfer/provision?DealerLogicalId=" +
         dealerId,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(inventory.data)
+        body: JSON.stringify(inventory.data),
       }
     )
       .then(async (e) => {
-        const data = await e.text()
+        const data = await e.text();
         setProgressInfo({
-          type: 'text',
+          type: "text",
           data: {
-            text: 'Got Inventory. Polling for progress...'
-          }
-        })
-        chrome.storage.local.set({ inventoryTaskId: data })
-        poll(setIsLoading, setProgressInfo, data)
-        return data
+            text: "Got Inventory. Polling for progress...",
+          },
+        });
+        chrome.storage.local.set({ inventoryTaskId: data });
+        poll(setIsLoading, setProgressInfo, data);
+        return data;
       })
       .catch((e) => {
-        console.error(e)
-        chrome.storage.local.remove('inventoryTaskId')
+        console.error(e);
+        chrome.storage.local.remove("inventoryTaskId");
         setProgressInfo({
-          type: 'text',
+          type: "text",
           data: {
-            text: 'There was an error sending inventory.'
-          }
-        })
-      })
+            text: "There was an error sending inventory.",
+          },
+        });
+      });
   } catch (e) {
-    console.error(e)
-    chrome.storage.local.remove('inventoryTaskId')
+    console.error(e);
+    chrome.storage.local.remove("inventoryTaskId");
     setProgressInfo({
-      type: 'text',
+      type: "text",
       data: {
-        text: 'There was an unexpected error. Please try again.'
-      }
-    })
+        text: "There was an unexpected error. Please try again.",
+      },
+    });
   }
 }
 
 async function poll(setIsSending: any, setProgressInfo: any, taskId: string) {
-  let intervalId: any
+  let intervalId: any;
   try {
-    setIsSending(true)
+    setIsSending(true);
     intervalId = setInterval(() => {
-      fetch('http://localhost:3000/api/v3/webhook/process?taskId=' + taskId)
+      fetch(import.meta.env.VITE_API_URL + "/webhook/process?taskId=" + taskId)
         .then(async (x) => {
           if (!x.ok) {
-            console.error('here err')
-            clearInterval(intervalId)
-            setIsSending(false)
-            chrome.storage.local.remove('inventoryTaskId')
+            console.error("here err");
+            clearInterval(intervalId);
+            setIsSending(false);
+            chrome.storage.local.remove("inventoryTaskId");
             setProgressInfo({
-              type: 'text',
+              type: "text",
               data: {
-                text: 'There was an error getting inventory process update.'
-              }
-            })
-            return
+                text: "There was an error getting inventory process update.",
+              },
+            });
+            return;
           }
-          const data = await x.json()
-          const { batchCurrent, batchTotal, isCompleted } = data
+          const data = await x.json();
+          const { batchCurrent, batchTotal, isCompleted } = data;
           if (isCompleted) {
-            clearInterval(intervalId)
-            chrome.storage.local.remove('inventoryTaskId')
+            clearInterval(intervalId);
+            chrome.storage.local.remove("inventoryTaskId");
             setProgressInfo({
-              type: 'text',
+              type: "text",
               data: {
-                text: 'Finished sending inventory.'
-              }
-            })
-            return
+                text: "Finished sending inventory.",
+              },
+            });
+            return;
           }
           setProgressInfo({
-            type: 'progress',
+            type: "progress",
             data: {
               current: batchCurrent,
-              total: batchTotal
-            }
-          })
+              total: batchTotal,
+            },
+          });
         })
         .catch((e) => {
-          console.error(e)
-          clearInterval(intervalId)
-          setIsSending(false)
-          chrome.storage.local.remove('inventoryTaskId')
+          console.error(e);
+          clearInterval(intervalId);
+          setIsSending(false);
+          chrome.storage.local.remove("inventoryTaskId");
           setProgressInfo({
-            type: 'text',
+            type: "text",
             data: {
-              text: 'There was an error getting inventory process update.'
-            }
-          })
-        })
-    }, 1000)
+              text: "There was an error getting inventory process update.",
+            },
+          });
+        });
+    }, 1000);
   } catch (e) {
-    console.error(e)
-    clearInterval(intervalId)
-    setIsSending(false)
-    chrome.storage.local.remove('inventoryTaskId')
+    console.error(e);
+    clearInterval(intervalId);
+    setIsSending(false);
+    chrome.storage.local.remove("inventoryTaskId");
     setProgressInfo({
-      type: 'text',
+      type: "text",
       data: {
-        text: 'There was an error getting inventory process update.'
-      }
-    })
+        text: "There was an error getting inventory process update.",
+      },
+    });
   }
 }
