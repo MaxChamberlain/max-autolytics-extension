@@ -26,7 +26,6 @@ export default function SendInventoryButton() {
   useEffect(() => {
     chrome.storage.local.get('inventoryTaskId', (data) => {
       if (data.inventoryTaskId) {
-        console.log('data', data)
         poll(setIsSending, setProgressInfo, data.inventoryTaskId)
       }
     })
@@ -164,6 +163,7 @@ async function poll(setIsSending: any, setProgressInfo: any, taskId: string) {
     intervalId = setInterval(() => {
       fetch('http://localhost:3000/api/v3/webhook/process?taskId=' + taskId)
         .then(async (x) => {
+          console.log('xxx', x)
           if (!x.ok) {
             console.error('here err')
             clearInterval(intervalId)

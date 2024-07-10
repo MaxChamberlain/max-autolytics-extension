@@ -256,21 +256,25 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
                 console.log('No data')
               }
             } else if (document.getElementById('add-sale-btn')) {
-              document.getElementById('add-sale-btn').click()
               setTimeout(() => {
-                if (document.getElementById('invisible-data-input')) {
-                  const script = document.getElementById('invisible-data-input')
-                  if (data) {
-                    script.setAttribute(
-                      'data',
-                      JSON.stringify(data.saleVehicle)
+                document.getElementById('add-sale-btn').click()
+                setTimeout(() => {
+                  if (document.getElementById('invisible-data-input')) {
+                    const script = document.getElementById(
+                      'invisible-data-input'
                     )
-                    script.click()
-                    chrome.storage.local.remove('saleVehicle')
-                  } else {
-                    console.log('No data')
+                    if (data) {
+                      script.setAttribute(
+                        'data',
+                        JSON.stringify(data.saleVehicle)
+                      )
+                      script.click()
+                      chrome.storage.local.remove('saleVehicle')
+                    } else {
+                      console.log('No data')
+                    }
                   }
-                }
+                }, 1000)
               }, 500)
             }
           })
